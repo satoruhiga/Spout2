@@ -34,3 +34,20 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+# =========================
+# Build Files
+# =========================
+
+# Build Output Directories
+SpoutSDK/Source/VS2013/Win32
+SpoutSDK/Source/VS2013/x64
+
+DEMO/Source/Debug*
+DEMO/Source/Release*
+DEMO/Source/x64
+
+# Build Data Files
+*.sdf
+*.opensdf
+*.ipch
