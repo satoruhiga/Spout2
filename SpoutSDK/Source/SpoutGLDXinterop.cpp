@@ -461,10 +461,14 @@ bool spoutGLDXinterop::GetAdapterInfo(char *renderadapter,
 	}
 
 	if(!renderdescription || strlen(renderdescription) == 0) {
-		// nvd3d9wrap.dll is loaded into all processes when Optimus is enabled.
-		HMODULE nvd3d9wrap = GetModuleHandleA("nvd3d9wrap.dll");
-		if(nvd3d9wrap != NULL)
-			sprintf_s(renderdescription, maxsize, "Optimus graphics integrated adapter");
+		// nvoglvXX.dll is loaded into all processes when Optimus is enabled.
+		HMODULE nvoglv32 = GetModuleHandleA( "nvoglv32.dll" );
+		HMODULE nvoglv64 = GetModuleHandleA( "nvoglv64.dll" );
+		if( nvoglv32 != NULL || nvoglv64 != NULL )
+		{
+			sprintf_s( renderdescription, maxsize, "Optimus graphics integrated adapter" );
+			return true;
+		}
 		else
 			sprintf_s(renderdescription, maxsize, "No render device");
 	}
