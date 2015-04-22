@@ -108,9 +108,9 @@ SpoutReceiver receiver;	// Create a Spout receiver object
 // ================= CHANGE COMPILE FLAGS HERE =================
 // Rename the executable as necessary to get a sender/receiver pair
 //
-bool bReceiver      = false; // Compile for receiver (true) or sender (false)
-bool bDX9mode       = false; // Use DirectX 9 instead of DirectX 11 (default). Note Intel graphics detection switches back to DX9
-bool bMemoryMode    = false; // Use memory share specifically (default is false)
+bool bReceiver      = _RECEIVER; // Compile for receiver (true) or sender (false)
+bool bDX9mode       = _DX9MODE; // Use DirectX 9 instead of DirectX 11 (default). Note Intel graphics detection switches back to DX9
+bool bMemoryMode    = _MEMORYMODE; // Use memory share specifically (default is false)
 // =============================================================
 
 //
@@ -971,7 +971,7 @@ BOOL CreateGLWindow(int width, int height, int bits)
 	wc.hCursor			= LoadCursor(NULL, IDC_ARROW);			// Load The Arrow Pointer
 	wc.hbrBackground	= NULL;									// No Background Required For GL
 	wc.lpszMenuName		= MAKEINTRESOURCE(IDC_WINSPOUT);		// The menu
-	wc.lpszClassName	= L"OpenGL";							// Set The Class Name
+	wc.lpszClassName	= "OpenGL";								// Set The Class Name
 
 	if (!RegisterClass(&wc)) {									// Attempt To Register The Window Class
 		MessageBoxA(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);

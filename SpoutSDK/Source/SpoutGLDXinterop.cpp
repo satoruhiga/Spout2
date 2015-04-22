@@ -426,7 +426,8 @@ bool spoutGLDXinterop::GetAdapterInfo(char *renderadapter,
 			// This will list all the devices
 			nDevices++;
 			// Get the registry key
-			wcstombs_s(&charsConverted, regkey, 129, DisplayDevice.DeviceKey, 128);
+			memcpy_s( regkey, 256, DisplayDevice.DeviceKey, 128 );
+			//wcstombs_s(&charsConverted, regkey, 129, DisplayDevice.DeviceKey, 128);
 			// printf("DeviceKey = %s\n", regkey); 
 			// This is the registry key with all the information about the adapter
 			OpenDeviceKey(regkey, 256, driverdescription, driverversion);
