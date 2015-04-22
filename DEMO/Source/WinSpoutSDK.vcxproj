@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -29,25 +29,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v100</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -96,7 +98,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -104,7 +106,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glut32.lib;Spout64.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,32 +145,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Spout.h" />
-    <ClInclude Include="..\SpoutCommon.h" />
-    <ClInclude Include="..\SpoutDirectX.h" />
-    <ClInclude Include="..\SpoutGLDXinterop.h" />
-    <ClInclude Include="..\SpoutGLextensions.h" />
-    <ClInclude Include="..\SpoutMemoryShare.h" />
-    <ClInclude Include="..\SpoutReceiver.h" />
-    <ClInclude Include="..\SpoutSDK.h" />
-    <ClInclude Include="..\SpoutSender.h" />
-    <ClInclude Include="..\SpoutSenderNames.h" />
-    <ClInclude Include="..\SpoutSharedMemory.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\Spout.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutCommon.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutDirectX.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutGLDXinterop.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutGLextensions.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutMemoryShare.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutReceiver.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutSDK.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutSender.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutSenderNames.h" />
+    <ClInclude Include="..\..\SpoutSDK\Source\SpoutSharedMemory.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WinSpoutSDK.h" />
     <ClInclude Include="WinSpoutSDKresource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SpoutDirectX.cpp" />
-    <ClCompile Include="..\SpoutGLDXinterop.cpp" />
-    <ClCompile Include="..\SpoutGLextensions.cpp" />
-    <ClCompile Include="..\SpoutMemoryShare.cpp" />
-    <ClCompile Include="..\SpoutReceiver.cpp" />
-    <ClCompile Include="..\SpoutSDK.cpp" />
-    <ClCompile Include="..\SpoutSender.cpp" />
-    <ClCompile Include="..\SpoutSenderNames.cpp" />
-    <ClCompile Include="..\SpoutSharedMemory.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutDirectX.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutGLDXinterop.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutGLextensions.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutMemoryShare.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutReceiver.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutSDK.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutSender.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutSenderNames.cpp" />
+    <ClCompile Include="..\..\SpoutSDK\Source\SpoutSharedMemory.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -80,6 +80,7 @@
 
 #include "stdafx.h"
 #include "WinSpoutSDK.h"
+#include "resource.h"
 
 // #define SPOUT_IMPORT_DLL
 
@@ -93,7 +94,7 @@
 #define CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#include "..\..\SpoutSDK\Spout.h"
+#include "..\..\SpoutSDK\Source\Spout.h"
 
 // This allows the Optimus global 3d setting to be "adapt" instead of "high performance"
 extern "C" {
@@ -2059,7 +2060,7 @@ void trim(char * s) {
     char * p = s;
     int l = strlen(p);
 
-    while(isspace(p[l - 1])) p[--l] = 0;
+    while(* p && isspace(p[l - 1])) p[--l] = 0;
     while(* p && isspace(* p)) ++p, --l;
 
     memmove(s, p, l + 1);
