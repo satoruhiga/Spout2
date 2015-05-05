@@ -1416,6 +1416,42 @@ bool spoutGLDXinterop::WriteTexture(GLuint TextureID, GLuint TextureTarget, unsi
 
 } // end WriteTexture
 
+bool spoutGLDXinterop::WriteTexture(ID3D11Texture2D** texture, bool bInvert)
+{
+	if(m_hInteropDevice == NULL || m_hInteropObject == NULL) {
+		return false;
+	}
+
+	D3D11_TEXTURE2D_DESC desc = { 0 };
+	(*texture)->GetDesc(&desc);
+	if(desc.Width != (unsigned int)m_TextureInfo.width || desc.Height != (unsigned int)m_TextureInfo.height) {
+		return false;
+	}
+
+	// Wait for access to the texture
+	if(spoutdx.CheckAccess(m_hAccessMutex)) {
+
+		// lock dx object
+		if(LockInteropObject(m_hInteropDevice, &m_hInteropObject) == S_OK) {
+
+			D3D11_BOX copyBox = { 0 };
+			copyBox.right = desc.Width;
+			copyBox.bottom = desc.Height;
+
+			g_pImmediateContext->CopySubresourceRegion(g_pSharedTexture, 0, 0, 0, 0, *texture, 0, &copyBox);
+
+			// unlock dx object
+			UnlockInteropObject(m_hInteropDevice, &m_hInteropObject);
+		}
+		spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
+		return true;
+	}
+
+	// There is no reader
+	spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
+
+	return false;
+}
 
 // COPY THE SHARED TEXTURE TO AN OUTPUT TEXTURE
 bool spoutGLDXinterop::ReadTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, bool bInvert, GLuint HostFBO)
@@ -1508,6 +1544,43 @@ bool spoutGLDXinterop::ReadTexture(GLuint TextureID, GLuint TextureTarget, unsig
 	spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
 	return true;
 	*/
+
+} // end ReadTexture
+
+
+// COPY THE SHARED TEXTURE TO AN OUTPUT TEXTURE
+bool spoutGLDXinterop::ReadTexture(ID3D11Texture2D** texture, bool bInvert)
+{
+	if(m_hInteropDevice == NULL || m_hInteropObject == NULL) {
+		return false;
+	}
+
+	D3D11_TEXTURE2D_DESC desc = { 0 };
+	(*texture)->GetDesc(&desc);
+	if(desc.Width != (unsigned int)m_TextureInfo.width || desc.Height != (unsigned int)m_TextureInfo.height) {
+		return false;
+	}
+
+	// Invert code
+	if(spoutdx.CheckAccess(m_hAccessMutex)) {
+
+		// lock interop
+		if(LockInteropObject(m_hInteropDevice, &m_hInteropObject) == S_OK) {
+
+			D3D11_BOX copyBox = { 0 };
+			copyBox.right = desc.Width;
+			copyBox.bottom = desc.Height;
+
+			g_pImmediateContext->CopySubresourceRegion(g_pSharedTexture, 0, 0, 0, 0, *texture, 0, &copyBox);
+
+			// unlock dx object
+			UnlockInteropObject(m_hInteropDevice, &m_hInteropObject);
+		}
+		spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
+	}
+	spoutdx.AllowAccess(m_hAccessMutex);
+
+	return true;
 
 } // end ReadTexture
 

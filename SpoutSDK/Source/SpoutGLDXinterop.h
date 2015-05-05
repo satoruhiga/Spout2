@@ -70,7 +70,9 @@ class SPOUT_DLLEXP spoutGLDXinterop {
 		bool WriteTexturePixels(unsigned char *pixels, unsigned int width, unsigned int height, GLenum glFormat = GL_RGBA, bool bAlignment = true);
 
 		bool ReadTexture (GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, bool bInvert=false, GLuint HostFBO=0);
+		bool ReadTexture(ID3D11Texture2D** texture, bool bInvert=false);
 		bool WriteTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, bool bInvert=false, GLuint HostFBO=0);
+		bool WriteTexture(ID3D11Texture2D** texture, bool bInvert=false);
 		#ifdef USE_PBO_EXTENSIONS
 		bool LoadTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, unsigned char *data);
 		#endif

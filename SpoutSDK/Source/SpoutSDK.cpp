@@ -300,6 +300,22 @@ bool Spout::SendTexture(GLuint TextureID, GLuint TextureTarget, unsigned int wid
 
 } // end SendTexture
 
+bool Spout::SendTexture(ID3D11Texture2D** texture, bool bInvert)
+{
+	if(bDxInitOK) {
+
+		D3D11_TEXTURE2D_DESC desc = { 0 };
+		(*texture)->GetDesc(&desc);
+
+		// width, g_Width should all be the same
+		// But it is the responsibility of the application to reset any texture that is being sent out.
+		if(desc.Width != g_Width || desc.Height != g_Height) {
+			return(UpdateSender(g_SharedMemoryName, desc.Width, desc.Height));
+		}
+		return(interop.WriteTexture(texture, bInvert));
+	}
+	return false;
+}
 
 // If the local texure has changed dimensions this will return false
 bool Spout::SendImage(unsigned char* pixels, unsigned int width, unsigned int height, GLenum glFormat, bool bAlignment, bool bInvert)
@@ -554,6 +570,116 @@ bool Spout::ReceiveTexture(char* name, unsigned int &width, unsigned int &height
 
 } // end ReceiveTexture
 
+//
+// ReceiveTexture
+//
+bool Spout::ReceiveTexture(char* name, unsigned int &width, unsigned int &height, ID3D11Texture2D** texture, bool bInvert)
+{
+	char newname[256];
+	unsigned int newWidth, newHeight;
+	DWORD dwFormat;
+	HANDLE hShareHandle;
+
+	// printf("Spout::ReceiveTexture HostFBO = %d\n", HostFBO);
+
+	// Has it initialized yet ?
+	if(!bInitialized) {
+
+		// The name passed is the name to try to connect to 
+		// unless the bUseActive flag is set or the name is not initialized
+		// in which case it will try to find the active sender
+		// Width and height are passed back as well
+		if(name[0] != 0)
+			strcpy_s(newname, 256, name);
+		else
+			newname[0] = 0;
+
+		if(OpenReceiver(newname, newWidth, newHeight)) {
+			// OpenReceiver will also set the global name, width, height and format
+			// Pass back the new name, width and height to the caller
+			// The change has to be detected by the application
+			strcpy_s(name, 256, newname);
+			width = newWidth;
+			height = newHeight;
+			return true;
+		}
+		else {
+			// Initialization failure - the sender is not there 
+			// Quit to let the app try again
+			return false;
+		}
+	} // endif not initialized
+
+	if(bDxInitOK && !bMemoryShareInitOK) {
+
+		// Check to see if SpoutPanel has been opened 
+		// the globals are reset if it has been
+		// And the sender name will be different to that passed
+		CheckSpoutPanel();
+
+		// Test to see whether the current sender is still there
+		if(interop.senders.CheckSender(g_SharedMemoryName, newWidth, newHeight, hShareHandle, dwFormat)) {
+
+			// Current sender still exists
+			// Has the width, height, texture format changed
+			// DEBUG no global sharehandle
+			if(newWidth > 0 && newHeight > 0) {
+				if(newWidth != g_Width
+					|| newHeight != g_Height
+					|| dwFormat != g_Format
+					|| strcmp(name, g_SharedMemoryName) != 0) {
+
+					// Re-initialize the receiver
+					if(OpenReceiver(g_SharedMemoryName, newWidth, newHeight)) {
+						// TODO - Set the global texture ID here
+						// g_TexID = TextureID;
+						g_Width = newWidth;
+						g_Height = newHeight;
+						// Pass back the new current name and size
+						strcpy_s(name, 256, g_SharedMemoryName);
+						width = g_Width;
+						height = g_Height;
+						// Return the new sender name and dimensions
+						// The change has to be detected by the application
+						return true;
+					} // OpenReceiver OK
+					else {
+						// need what here
+						return false;
+					}
+				} // width, height, format or name have changed
+			} // width and height are zero
+			else {
+				// need what here
+				return false;
+			}
+		} // endif CheckSender found a sender
+		else {
+			g_SharedMemoryName[0] = 0; // sender no longer exists
+			ReleaseReceiver(); // Start again
+			return false;
+		} // CheckSender did not find the sender - probably closed
+
+		// Sender exists and everything matched
+		// globals are now all current, so pass back the current name and size
+		// so that there is no change found by the host
+		strcpy_s(name, 256, g_SharedMemoryName);
+		width = g_Width;
+		height = g_Height;
+
+		// If a valid texture was passed, read the shared texture into it
+		// Otherwise skip it, all the checks are done
+		if(texture && *texture) {
+			if(!interop.ReadTexture(texture, bInvert)) {
+				return false;
+			}
+		}
+		// All OK - drop though to return true
+	}
+
+	return true;
+
+} // end ReceiveTexture
 
 // Note was RGB only, but the format passed should go through now and work. 
 // Default format is now GL_RGBA but Memoryshare mode remains RGB only.

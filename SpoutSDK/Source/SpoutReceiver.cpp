@@ -61,6 +61,11 @@ bool SpoutReceiver::ReceiveTexture(char* name, unsigned int &width, unsigned int
 	return spout.ReceiveTexture(name, width, height, TextureID, TextureTarget, bInvert, HostFBO);
 }
 
+//---------------------------------------------------------
+bool SpoutReceiver::ReceiveTexture(char* name, unsigned int &width, unsigned int &height, ID3D11Texture2D** texture, bool bInvert)
+{
+	return spout.ReceiveTexture(name, width, height, texture, bInvert);
+}
 
 //---------------------------------------------------------
 bool SpoutReceiver::ReceiveImage(char* name, unsigned int &width, unsigned int &height, unsigned char* pixels, GLenum glFormat, GLuint HostFBO)

@@ -46,6 +46,7 @@ class SPOUT_DLLEXP SpoutSender {
 
 	bool SendImage(unsigned char* pixels, unsigned int width, unsigned int height, GLenum glFormat = GL_RGBA, bool bAlignment = true, bool bInvert=true);
 	bool SendTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, bool bInvert=true, GLuint HostFBO = 0);
+	bool SendTexture(ID3D11Texture2D** texture, bool bInvert=false);
 	bool DrawToSharedTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, float max_x = 1.0, float max_y = 1.0, float aspect = 1.0, bool bInvert = true, GLuint HostFBO = 0);
 
 	bool SetMemoryShareMode(bool bMemoryMode = true);

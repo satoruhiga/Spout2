@@ -74,6 +74,7 @@ class SPOUT_DLLEXP Spout {
 	bool UpdateSender(char* Sendername, unsigned int width, unsigned int height);
 	void ReleaseSender(DWORD dwMsec = 0);
 	bool SendTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, bool bInvert=true, GLuint HostFBO=0);
+	bool SendTexture(ID3D11Texture2D**, bool bInvert = false);
 	bool SendImage(unsigned char* pixels, unsigned int width, unsigned int height, GLenum glFormat = GL_RGBA, bool bAlignment = true, bool bInvert=true);
 
 	// Receiver
@@ -81,6 +82,7 @@ class SPOUT_DLLEXP Spout {
 	void ReleaseReceiver(); 
 
 	bool ReceiveTexture(char* Sendername, unsigned int &width, unsigned int &height, GLuint TextureID = 0, GLuint TextureTarget = 0, bool bInvert = false, GLuint HostFBO=0);
+	bool ReceiveTexture(char* Sendername, unsigned int &width, unsigned int &height, ID3D11Texture2D** texture, bool bInvert=false);
 	bool ReceiveImage(char* Sendername, unsigned int &width, unsigned int &height, unsigned char* pixels, GLenum glFormat = GL_RGBA, GLuint HostFBO=0);
 	
 	bool GetImageSize (char* sendername, unsigned int &width, unsigned int &height, bool &bMemoryMode);	

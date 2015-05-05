@@ -87,6 +87,12 @@ bool SpoutSender::SendTexture(GLuint TextureID, GLuint TextureTarget,  unsigned 
 }
 
 //---------------------------------------------------------
+bool SpoutSender::SendTexture(ID3D11Texture2D** texture, bool bInvert)
+{
+	return spout.SendTexture(texture, bInvert);
+}
+
+//---------------------------------------------------------
 bool SpoutSender::DrawToSharedTexture(GLuint TextureID, GLuint TextureTarget, unsigned int width, unsigned int height, float max_x, float max_y, float aspect, bool bInvert, GLuint HostFBO)
 {
 	return spout.DrawToSharedTexture(TextureID, TextureTarget, width, height, max_x, max_y, aspect, bInvert, HostFBO);
