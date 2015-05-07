@@ -1738,21 +1738,25 @@ bool Spout::OpenSpout()
 	// Has the global memoryshare over-ride flag been set?
 	if(!bMemory) {
 		hdc = wglGetCurrentDC(); // OpenGl device context is needed
-		if(!hdc) {
-			MessageBoxA(NULL, "    Cannot get GL device context", "OpenSpout", MB_OK);
-			return false;
-		}
-
-		g_hWnd = WindowFromDC(hdc); // can be null though
-		if(interop.LoadGLextensions()) { // did the extensions load OK ?
-			// Initialize DirectX and prepare GLDX interop
-			if(interop.OpenDirectX(g_hWnd, GetDX9())) { // did the NVIDIA open interop extension work ?
-				bDxInitOK = true; // DirectX initialization OK
-				bMemoryShareInitOK = false;
-				bGLDXcompatible = true; // Set global compatibility flag as well
-				return true; 
+		if(hdc) {
+			g_hWnd = WindowFromDC(hdc); // can be null though
+			if(!interop.LoadGLextensions()) { // did the extensions load OK ?
+				return false;
 			}
 		}
+		else
+		{
+			//MessageBoxA(NULL, "    Cannot get GL device context", "OpenSpout", MB_OK);
+			//return false;
+		}
+	}
+
+	// Initialize DirectX and prepare GLDX interop
+	if(interop.OpenDirectX(g_hWnd, GetDX9())) { // did the NVIDIA open interop extension work ?
+		bDxInitOK = true; // DirectX initialization OK
+		bMemoryShareInitOK = false;
+		bGLDXcompatible = true; // Set global compatibility flag as well
+		return true;
 	}
 
 	// Drop through and try to initialize shared memory

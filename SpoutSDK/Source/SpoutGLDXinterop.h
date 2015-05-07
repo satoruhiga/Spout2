@@ -98,6 +98,7 @@ class SPOUT_DLLEXP spoutGLDXinterop {
 		// DX11
 		DXGI_FORMAT	DX11format; // the DX11 texture format to be used
 		void SetDX11format(DXGI_FORMAT textureformat); // set format by user
+		void SetDX11device(ID3D11Device * device) { g_pd3dDevice = device; }
 
 		bool CreateDX11interop(unsigned int width, unsigned int height, DWORD dwFormat, bool bReceive);
 		bool OpenDirectX11(); // Initialize and prepare DirectX11

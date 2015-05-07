@@ -407,7 +407,6 @@ bool spoutGLDXinterop::GetAdapterInfo(char *renderadapter,
 	char driverdescription[256];
 	char driverversion[256];
 	char regkey[256];
-	size_t charsConverted = 0;
 	
 	// Additional info
 	DISPLAY_DEVICE DisplayDevice;
@@ -460,18 +459,15 @@ bool spoutGLDXinterop::GetAdapterInfo(char *renderadapter,
 		return true;
 	}
 
-	if(!renderdescription || strlen(renderdescription) == 0) {
-		// nvoglvXX.dll is loaded into all processes when Optimus is enabled.
-		HMODULE nvoglv32 = GetModuleHandleA( "nvoglv32.dll" );
-		HMODULE nvoglv64 = GetModuleHandleA( "nvoglv64.dll" );
-		if( nvoglv32 != NULL || nvoglv64 != NULL )
-		{
-			sprintf_s( renderdescription, maxsize, "Optimus graphics integrated adapter" );
-			return true;
-		}
-		else
-			sprintf_s(renderdescription, maxsize, "No render device");
+	// nvinit.dll is loaded into all processes when Optimus is enabled.
+	HMODULE nvinit = GetModuleHandleA( "nvinit.dll" );
+	if( nvinit != NULL )
+	{
+		sprintf_s( renderdescription, maxsize, "Optimus graphics integrated adapter" );
+		return true;
 	}
+	else
+		sprintf_s(renderdescription, maxsize, "No render device");
 
 	bDX9 = true; // will return to re-initialize DirectX 9
 
@@ -484,12 +480,6 @@ bool spoutGLDXinterop::CreateInterop(HWND hWnd, char* sendername, unsigned int w
 {
 	bool bRet = true;
 	DWORD format;
-
-	// Needs an openGL context to work
-	if(!wglGetCurrentContext()) {
-		// MessageBoxA(NULL, "CreateInterop - no GL context", "Warning", MB_OK);
-		return false;
-	}
 
 	// printf("CreateInterop - %dx%d - format (%d) \n", width, height, dwFormat);
 
@@ -574,22 +564,25 @@ bool spoutGLDXinterop::CreateInterop(HWND hWnd, char* sendername, unsigned int w
 		m_hInteropObject = NULL;
 	}
 
-	// Create an fbo for copying textures
-	if(m_fbo) {
-		// Delete the fbo before the texture so that any texture attachment is released
-		// printf("CreateInterop - deleting fbo\n");
-		glDeleteFramebuffersEXT(1, &m_fbo);
-		m_fbo = 0;
-	}
-	glGenFramebuffersEXT(1, &m_fbo); 
+	// Needs an openGL context to work
+	if(wglGetCurrentContext()) {
+		// Create an fbo for copying textures
+		if(m_fbo) {
+			// Delete the fbo before the texture so that any texture attachment is released
+			// printf("CreateInterop - deleting fbo\n");
+			glDeleteFramebuffersEXT(1, &m_fbo);
+			m_fbo = 0;
+		}
+		glGenFramebuffersEXT(1, &m_fbo); 
 
-	// Create a local opengl texture that will be linked to a shared DirectX texture
-	if(m_glTexture) {
-		// printf("CreateInterop - deleting texture\n");
-		glDeleteTextures(1, &m_glTexture);
-		m_glTexture = 0;
+		// Create a local opengl texture that will be linked to a shared DirectX texture
+		if(m_glTexture) {
+			// printf("CreateInterop - deleting texture\n");
+			glDeleteTextures(1, &m_glTexture);
+			m_glTexture = 0;
+		}
+		glGenTextures(1, &m_glTexture);
 	}
-	glGenTextures(1, &m_glTexture);
 
 	// Create textures and GLDX interop objects
 	if(bUseDX9)	bRet = CreateDX9interop(width, height, format, bReceive);
@@ -691,17 +684,18 @@ bool spoutGLDXinterop::CreateDX9interop(unsigned int width, unsigned int height,
 		return false;
 	}
 
-
-	// Link the shared DirectX texture to the OpenGL texture
-	// This registers for interop and associates the opengl texture with the dx texture
-	// by calling wglDXRegisterObjectNV which returns a handle to the interop object
-	// (the shared texture) (m_hInteropObject)
-	m_hInteropObject = LinkGLDXtextures(m_pDevice, m_dxTexture, m_dxShareHandle, m_glTexture); 
-	if(!m_hInteropObject) {
-		printf("    LinkGLDXtextures failed\n");	
-		return false;
+	if(m_glTexture)
+	{
+		// Link the shared DirectX texture to the OpenGL texture
+		// This registers for interop and associates the opengl texture with the dx texture
+		// by calling wglDXRegisterObjectNV which returns a handle to the interop object
+		// (the shared texture) (m_hInteropObject)
+		m_hInteropObject = LinkGLDXtextures(m_pDevice, m_dxTexture, m_dxShareHandle, m_glTexture);
+		if(!m_hInteropObject) {
+			printf("    LinkGLDXtextures failed\n");
+			return false;
+		}
 	}
-
 
 	return true;
 }
@@ -740,12 +734,15 @@ bool spoutGLDXinterop::CreateDX11interop(unsigned int width, unsigned int height
 		}
 	}
 
-	// Link the shared DirectX texture to the OpenGL texture
-	// This registers for interop and associates the opengl texture with the dx texture
-	// by calling wglDXRegisterObjectNV which returns a handle to the interop object
-	// (the shared texture) (m_hInteropObject)
-	m_hInteropObject = LinkGLDXtextures(g_pd3dDevice, g_pSharedTexture, m_dxShareHandle, m_glTexture); 
-	if(!m_hInteropObject) return false;
+	if(m_glTexture)
+	{
+		// Link the shared DirectX texture to the OpenGL texture
+		// This registers for interop and associates the opengl texture with the dx texture
+		// by calling wglDXRegisterObjectNV which returns a handle to the interop object
+		// (the shared texture) (m_hInteropObject)
+		m_hInteropObject = LinkGLDXtextures(g_pd3dDevice, g_pSharedTexture, m_dxShareHandle, m_glTexture);
+		if(!m_hInteropObject) return false;
+	}
 
 	return true;
 
@@ -892,9 +889,9 @@ void spoutGLDXinterop::CleanupDX11()
 	if(g_pSharedTexture != NULL) g_pSharedTexture->Release();
 	// 21.10.14 - removed due to problems
 	// spoutdx.CloseDX11(); // release immediate context before releasing the device
-	if(g_pd3dDevice != NULL) g_pd3dDevice->Release();
+	//if(g_pd3dDevice != NULL) g_pd3dDevice->Release();
 	g_pSharedTexture = NULL; // Important because mutex locks check for NULL
-	g_pd3dDevice = NULL;
+	//g_pd3dDevice = NULL;
 
 }
 
@@ -1418,7 +1415,8 @@ bool spoutGLDXinterop::WriteTexture(GLuint TextureID, GLuint TextureTarget, unsi
 
 bool spoutGLDXinterop::WriteTexture(ID3D11Texture2D** texture, bool bInvert)
 {
-	if(m_hInteropDevice == NULL || m_hInteropObject == NULL) {
+	if(!texture || !*texture)
+	{
 		return false;
 	}
 
@@ -1428,21 +1426,16 @@ bool spoutGLDXinterop::WriteTexture(ID3D11Texture2D** texture, bool bInvert)
 		return false;
 	}
 
+	if(!g_pImmediateContext)
+	{
+		g_pd3dDevice->GetImmediateContext(&g_pImmediateContext);
+	}
+
 	// Wait for access to the texture
 	if(spoutdx.CheckAccess(m_hAccessMutex)) {
 
-		// lock dx object
-		if(LockInteropObject(m_hInteropDevice, &m_hInteropObject) == S_OK) {
+		g_pImmediateContext->CopyResource(g_pSharedTexture, *texture);
 
-			D3D11_BOX copyBox = { 0 };
-			copyBox.right = desc.Width;
-			copyBox.bottom = desc.Height;
-
-			g_pImmediateContext->CopySubresourceRegion(g_pSharedTexture, 0, 0, 0, 0, *texture, 0, &copyBox);
-
-			// unlock dx object
-			UnlockInteropObject(m_hInteropDevice, &m_hInteropObject);
-		}
 		spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
 		return true;
 	}
@@ -1551,7 +1544,8 @@ bool spoutGLDXinterop::ReadTexture(GLuint TextureID, GLuint TextureTarget, unsig
 // COPY THE SHARED TEXTURE TO AN OUTPUT TEXTURE
 bool spoutGLDXinterop::ReadTexture(ID3D11Texture2D** texture, bool bInvert)
 {
-	if(m_hInteropDevice == NULL || m_hInteropObject == NULL) {
+	if(!texture || !*texture)
+	{
 		return false;
 	}
 
@@ -1561,21 +1555,16 @@ bool spoutGLDXinterop::ReadTexture(ID3D11Texture2D** texture, bool bInvert)
 		return false;
 	}
 
+	if(!g_pImmediateContext)
+	{
+		g_pd3dDevice->GetImmediateContext(&g_pImmediateContext);
+	}
+
 	// Invert code
 	if(spoutdx.CheckAccess(m_hAccessMutex)) {
 
-		// lock interop
-		if(LockInteropObject(m_hInteropDevice, &m_hInteropObject) == S_OK) {
+		g_pImmediateContext->CopyResource(*texture, g_pSharedTexture);
 
-			D3D11_BOX copyBox = { 0 };
-			copyBox.right = desc.Width;
-			copyBox.bottom = desc.Height;
-
-			g_pImmediateContext->CopySubresourceRegion(g_pSharedTexture, 0, 0, 0, 0, *texture, 0, &copyBox);
-
-			// unlock dx object
-			UnlockInteropObject(m_hInteropDevice, &m_hInteropObject);
-		}
 		spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
 	}
 	spoutdx.AllowAccess(m_hAccessMutex);

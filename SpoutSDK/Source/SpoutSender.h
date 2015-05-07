@@ -55,6 +55,8 @@ class SPOUT_DLLEXP SpoutSender {
 	bool SetDX9(bool bDX9 = true); // set to use DirectX 9 (default is DirectX 11)
 	bool GetDX9();
 
+	void SetDX11device(ID3D11Device * device) { spout.SetDX11device(device); }
+
 	void SetDX9compatible(bool bCompatible = true); // DirectX 11 format compatible with DirectX 9
 	bool GetDX9compatible();
 
