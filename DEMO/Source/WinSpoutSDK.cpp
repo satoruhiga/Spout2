@@ -1731,9 +1731,27 @@ void doFullScreen(bool bFullscreen)
 			ShowCursor(TRUE);
 		}
 		else {
-			SetWindowPos(hWndTaskBar, HWND_NOTOPMOST, 0, 0, (rectTaskBar.right-rectTaskBar.left), (rectTaskBar.bottom-rectTaskBar.top), SWP_NOMOVE | SWP_NOSIZE);
-			SetWindowPos(g_hwnd, HWND_NOTOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_SHOWWINDOW);
-			SetWindowPos(g_hwnd, HWND_TOP, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_SHOWWINDOW);
+			RECT monitorRect = { 0 };
+			HMONITOR windowMonitor = MonitorFromWindow(g_hwnd, MONITOR_DEFAULTTONULL);
+			if(windowMonitor)
+			{
+				MONITORINFO monitorInfo = { 0 };
+				monitorInfo.cbSize = sizeof(MONITORINFO);
+				GetMonitorInfo(windowMonitor, &monitorInfo);
+				monitorRect = monitorInfo.rcMonitor;
+			}
+			else
+			{
+				monitorRect.right = GetSystemMetrics(SM_CXSCREEN);
+				monitorRect.bottom = GetSystemMetrics(SM_CYSCREEN);
+			}
+
+			width = monitorRect.right - monitorRect.left;
+			height = monitorRect.bottom - monitorRect.top;
+
+			SetWindowPos(hWndTaskBar, HWND_NOTOPMOST, monitorRect.left, monitorRect.top, (rectTaskBar.right - rectTaskBar.left), (rectTaskBar.bottom - rectTaskBar.top), SWP_NOMOVE | SWP_NOSIZE);
+			SetWindowPos(g_hwnd, HWND_NOTOPMOST, monitorRect.left, monitorRect.top, width, height, SWP_SHOWWINDOW);
+			SetWindowPos(g_hwnd, HWND_TOP, monitorRect.left, monitorRect.top, width, height, SWP_SHOWWINDOW);
 			ShowCursor(FALSE);
 		}
 
