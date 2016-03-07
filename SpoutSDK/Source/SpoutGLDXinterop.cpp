@@ -1432,16 +1432,17 @@ bool spoutGLDXinterop::WriteTexture(ID3D11Texture2D** texture, bool bInvert)
 	}
 
 	// Wait for access to the texture
-	if(spoutdx.CheckAccess(m_hAccessMutex)) {
+	if(spoutdx.CheckAccess(m_hAccessMutex, g_pSharedTexture)) {
 
 		g_pImmediateContext->CopyResource(g_pSharedTexture, *texture);
+		g_pImmediateContext->Flush();
 
-		spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
+		spoutdx.AllowAccess(m_hAccessMutex, g_pSharedTexture); // Allow access to the texture
 		return true;
 	}
 
 	// There is no reader
-	spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
+	spoutdx.AllowAccess(m_hAccessMutex, g_pSharedTexture); // Allow access to the texture
 
 	return false;
 }
@@ -1561,13 +1562,14 @@ bool spoutGLDXinterop::ReadTexture(ID3D11Texture2D** texture, bool bInvert)
 	}
 
 	// Invert code
-	if(spoutdx.CheckAccess(m_hAccessMutex)) {
+	if(spoutdx.CheckAccess(m_hAccessMutex, g_pSharedTexture)) {
 
 		g_pImmediateContext->CopyResource(*texture, g_pSharedTexture);
+		g_pImmediateContext->Flush();
 
-		spoutdx.AllowAccess(m_hAccessMutex); // Allow access to the texture
+		spoutdx.AllowAccess(m_hAccessMutex, g_pSharedTexture); // Allow access to the texture
 	}
-	spoutdx.AllowAccess(m_hAccessMutex);
+	spoutdx.AllowAccess(m_hAccessMutex, g_pSharedTexture);
 
 	return true;
 
